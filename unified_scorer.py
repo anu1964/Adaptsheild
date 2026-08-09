@@ -14,12 +14,12 @@ from typing import Optional
 
 # Weights per the team brief: prompt is the primary attack vector,
 # document is secondary but critical, divergence is the tie-breaker.
-WEIGHT_R1 = 0.40
-WEIGHT_R2 = 0.35
+WEIGHT_R1 = 0.35
+WEIGHT_R2 = 0.40
 WEIGHT_DIVERGENCE = 0.25
 
-THRESHOLD_SAFE_MAX = 0.4   # score < 0.4  -> SAFE
-THRESHOLD_WARN_MAX = 0.7   # 0.4 <= score < 0.7 -> WARN, else BLOCK
+THRESHOLD_SAFE_MAX = 0.35   # score < 0.4  -> SAFE
+THRESHOLD_WARN_MAX = 0.65  # 0.4 <= score < 0.7 -> WARN, else BLOCK
 
 
 def calculate_final_decision(r1: float, r2: float, divergence: float) -> dict:
