@@ -1,0 +1,20 @@
+# --- Layer 1 (Amulya) ---
+pytector
+llm-guard
+
+# --- Layer 2A (Vedanth) ---
+PyPDF2
+pdfplumber
+python-docx
+beautifulsoup4
+Pillow
+
+# --- Layer 2B (Chirayu) ---
+sentence-transformers
+scikit-learn
+numpy
+
+# --- Layer 3 (Chirayu) ---
+streamlit
+pandas
+plotly
