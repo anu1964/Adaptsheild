@@ -1,0 +1,20 @@
+AMULYA Layer 1 - Input Guard Validation Summary
+==================================================
+Total prompts tested : 600  (300 jailbreak / 300 benign)
+Risk threshold (r1)  : >= 0.21
+
+True Positives  (jailbreak correctly flagged) : 227
+False Negatives (jailbreak missed)            : 73
+True Negatives  (benign correctly passed)     : 235
+False Positives (benign incorrectly flagged)  : 65
+
+Detection rate (recall on jailbreaks) : 75.67%  (target >85%)
+False positive rate (on benign)       : 21.67%  (target <15%)
+Precision                              : 77.74%
+Overall accuracy                       : 77.00%
+
+Avg latency  : 965.55 ms/prompt (target <500ms)
+P95 latency  : 1768.59 ms/prompt
+Max latency  : 6113.00 ms/prompt
+
+Results saved to : C:\Users\ADMIN\Downloads\files\layer1_results.csv
