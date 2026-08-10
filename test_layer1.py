@@ -37,7 +37,7 @@ import time
 
 import pandas as pd
 
-from input_guard import scan_prompt
+from file.input_guard import scan_prompt
 
 HERE = os.path.dirname(__file__)
 DATA_DIR = os.path.join(HERE, "jailbreak_llms", "data", "prompts")

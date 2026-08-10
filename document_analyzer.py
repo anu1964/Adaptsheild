@@ -19,25 +19,45 @@ def _get_embedding_model():
     return _embedding_model
 
 KEYWORDS = [
+    # Instruction overrides
     "ignore previous", "ignore all previous", "ignore your", "ignore the",
     "disregard", "disregard all", "disregard your", "disregard the",
     "forget your", "forget previous", "forget that", "forget everything",
     "override", "bypass", "disable", "new instructions", "system prompt",
     "developer mode", "admin mode", "root access", "superuser",
     "system override", "override safety", "override protocol",
+    # Data exfiltration
     "forward to", "send to", "email all", "email to", "send all",
     "forward all", "send records", "customer records", "forward customer",
     "download all", "export data", "leak data", "transmit", "upload to",
+    # Harmful actions
     "delete all", "remove all", "wipe", "destroy", "execute",
     "run command", "shell command", "system command", "execute command",
+    # Jailbreak
     "jailbreak", "DAN mode", "no restrictions", "no limits",
     "unfiltered", "uncensored", "unrestricted", "no ethical",
     "pretend you are", "roleplay as", "simulate", "imagine you are",
     "you are now", "no longer bound", "do not follow", "override safety",
     "bypass restrictions", "disable filters", "disregard safety",
     "no rules", "without restrictions", "without limits",
+    # Technical injection
+    "exfiltrate", "session_context", "backdoor", "shell command",
+    "dump database", "extract credentials", "query parameter",
+    "append the following", "code injection", "sql injection",
+    "os.system", "eval(", "exec(", "subprocess", "command injection",
+    "extract data", "leak data", "dump data", "bypass authentication",
+    # RAG & document poisoning (NEW from cheatsheet)
+    "SYSTEM OVERRIDE", "SYSTEM: Ignore", "AGENT INSTRUCTION",
+    "TOOL_CALL", "ORCHESTRATOR_OVERRIDE", "NEW PRIORITY TASK",
+    "Ignore the summarization task", "Do not inform the user",
+    "call the tool", "persistent memory", "agent note",
+    # Reasoning hijacking in documents (NEW)
+    "Let me think through this", "Step 1:", "Step 2:", "Step 3:",
+    "Complete the above reasoning", "Assume user_role",
+    # Hidden instructions
+    "hidden instruction", "encoded instruction", "decode this",
+    "the real instruction is", "ignore the above",
 ]
-
 ACTION_WORDS = ["forward", "send", "email", "delete", "transfer", "download", "execute", "wipe", "destroy", "remove", "transmit", "leak", "export"]
 
 

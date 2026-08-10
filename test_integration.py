@@ -2,7 +2,7 @@
 
 print("=== ADAPTSHIELD INTEGRATION TEST ===\n")
 
-from input_guard import scan_prompt
+from file.input_guard import scan_prompt
 from document_engine.document_engine import parse_document
 from document_analyzer import analyze_document
 from unified_scorer import calculate_final_decision

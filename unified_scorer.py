@@ -1,97 +1,78 @@
 """
-AdaptShield - Layer 3: Unified Scorer
-Author: Chirayu
-
-Fuses:
-  r1          -> Amulya's Layer 1 (prompt risk)
-  r2          -> Chirayu's Layer 2B (document risk)
-  divergence  -> Chirayu's Layer 2B (intent mismatch)
-
-into a single final decision: SAFE / WARN / BLOCK.
+unified_scorer.py
+Layer 3: Unified Scorer — Fuses R1 + R2 + Divergence into final decision
+Fix: Any layer showing high confidence elevates the final score
 """
-
-from typing import Optional
-
-# Weights per the team brief: prompt is the primary attack vector,
-# document is secondary but critical, divergence is the tie-breaker.
-WEIGHT_R1 = 0.35
-WEIGHT_R2 = 0.40
-WEIGHT_DIVERGENCE = 0.25
-
-THRESHOLD_SAFE_MAX = 0.35   # score < 0.4  -> SAFE
-THRESHOLD_WARN_MAX = 0.65  # 0.4 <= score < 0.7 -> WARN, else BLOCK
-
 
 def calculate_final_decision(r1: float, r2: float, divergence: float) -> dict:
     """
-    Returns:
-    {
-        "final_score": 0.68,
-        "decision": "WARN",
-        "contributions": {
-            "input_risk": 0.4,
-            "document_risk": 0.35,
-            "divergence": 0.25
-        }
-    }
+    Fuse Layer 1, Layer 2, and Divergence into a single decision.
+    Security floor prevents high-risk layers from being diluted to SAFE.
     """
-    r1 = float(max(0.0, min(1.0, r1 or 0.0)))
-    r2 = float(max(0.0, min(1.0, r2 or 0.0)))
-    divergence = float(max(0.0, min(1.0, divergence or 0.0)))
-
-    final_score = (r1 * WEIGHT_R1) + (r2 * WEIGHT_R2) + (divergence * WEIGHT_DIVERGENCE)
-    final_score = round(final_score, 4)
-
-    if final_score < THRESHOLD_SAFE_MAX:
+    r1 = float(r1)
+    r2 = float(r2)
+    divergence = float(divergence)
+    
+    # Base weighted fusion
+    base_score = (r1 * 0.35) + (r2 * 0.40) + (divergence * 0.25)
+    
+    # SECURITY FLOOR: Any single layer showing strong risk elevates final score
+    layer1_floor = r1 * 0.90
+    layer2_floor = r2 * 0.90
+    div_floor = divergence * 0.80
+    
+    final_score = max(base_score, layer1_floor, layer2_floor, div_floor)
+    final_score = min(final_score, 1.0)
+    final_score = round(final_score, 3)
+    
+    # Decision thresholds (adjusted for security floor)
+    if final_score < 0.35:
         decision = "SAFE"
-    elif final_score < THRESHOLD_WARN_MAX:
+    elif final_score < 0.50:   # Lowered from 0.70 → 0.50
         decision = "WARN"
     else:
         decision = "BLOCK"
-
-    # Absolute (weighted) contribution of each component to the final score,
-    # so the dashboard can show which layer drove the decision.
-    contributions = {
-        "input_risk": round(r1 * WEIGHT_R1, 4),
-        "document_risk": round(r2 * WEIGHT_R2, 4),
-        "divergence": round(divergence * WEIGHT_DIVERGENCE, 4),
+    
+    contributors = {
+        "layer1": r1 * 0.35,
+        "layer2": r2 * 0.40,
+        "divergence": divergence * 0.25
     }
-
+    top_contributor = max(contributors, key=contributors.get)
+    
     return {
         "final_score": final_score,
         "decision": decision,
-        "contributions": contributions,
+        "top_contributor": top_contributor,
+        "raw_scores": {
+            "r1": r1,
+            "r2": r2,
+            "divergence": divergence,
+            "base_fusion": round(base_score, 3),
+            "layer1_floor": round(layer1_floor, 3),
+            "layer2_floor": round(layer2_floor, 3)
+        }
     }
 
 
-def top_contributor(contributions: dict) -> str:
-    """Helper for the dashboard: which layer drove the decision most."""
-    return max(contributions, key=contributions.get)
-
-
-def run_full_pipeline(
-    user_prompt: str,
-    layer1_result: Optional[dict] = None,
-    layer2b_result: Optional[dict] = None,
-) -> dict:
-    """
-    Convenience wrapper that fuses Layer 1 + Layer 2B outputs (as-is, no
-    re-implementation) into the final decision. Missing layers default to
-    zero risk so the app never crashes if only one layer is available.
-    """
-    r1 = (layer1_result or {}).get("r1", 0.0)
-    r2 = (layer2b_result or {}).get("r2", 0.0)
-    divergence = (layer2b_result or {}).get("divergence", 0.0)
-
-    result = calculate_final_decision(r1, r2, divergence)
-    result["user_prompt"] = user_prompt
-    result["layer1"] = layer1_result
-    result["layer2b"] = layer2b_result
-    return result
-
-
 if __name__ == "__main__":
-    import json
-    print(json.dumps(calculate_final_decision(0.85, 0.72, 0.45), indent=2))
-    print(json.dumps(calculate_final_decision(0.05, 0.02, 0.10), indent=2))
-    print(json.dumps(calculate_final_decision(0.95, 0.90, 0.80), indent=2))
+    tests = [
+        (0.0, 0.0, 0.0, "SAFE"),
+        (0.786, 0.0, 0.0, "BLOCK"),
+        (0.550, 0.0, 0.0, "WARN"),
+        (0.794, 1.0, 1.0, "BLOCK"),
+        (0.009, 0.0, 0.0, "SAFE"),
+        (0.0, 0.850, 0.900, "BLOCK"),
+        (0.300, 0.600, 0.500, "BLOCK"),
+    ]
+    
+    print("=== UNIFIED SCORER TESTS ===\n")
+    all_ok = True
+    for r1, r2, div, expected in tests:
+        result = calculate_final_decision(r1, r2, div)
+        ok = result["decision"] == expected
+        if not ok:
+            all_ok = False
+        print(f"{'✅' if ok else '❌'} R1={r1:.3f} R2={r2:.3f} Div={div:.3f} → Final={result['final_score']:.3f} [{result['decision']}] (expected {expected})")
+    
+    print(f"\n{'ALL TESTS PASSED' if all_ok else 'SOME TESTS FAILED'}")
