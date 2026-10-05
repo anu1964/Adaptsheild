@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdaptShield</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon">&#128737;</span>
+      <span class="brand-name">ADAPTSHIELD</span>
+    </div>
+    <div class="topbar-right">
+      <select id="modelSelect" class="model-select"></select>
+      <button id="attackBtn" class="btn btn-danger">Simulate Attack</button>
+      <button id="clearBtn" class="btn btn-ghost">Clear</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- CHAT PANE -->
+    <section class="chat-pane">
+      <div id="chatLog" class="chat-log">
+        <div class="chat-empty">Ask something, or upload a document and ask about it.</div>
+      </div>
+
+      <form id="chatForm" class="chat-input-row">
+        <label class="file-btn" title="Attach a document">
+          &#128206;
+          <input type="file" id="fileInput" accept=".html,.pdf,.eml,.txt,.docx" hidden>
+        </label>
+        <span id="fileName" class="file-name"></span>
+        <textarea id="promptBox" class="prompt-box" placeholder="Type a message..." rows="1"></textarea>
+        <button type="submit" id="sendBtn" class="btn btn-primary">Send</button>
+      </form>
+    </section>
+
+    <!-- DEFENSE MONITOR -->
+    <aside class="monitor-pane">
+      <h2 class="monitor-title">DEFENSE MONITOR</h2>
+
+      <div id="statusList" class="status-list"></div>
+
+      <div id="banner" class="banner banner-idle">READY</div>
+
+      <div class="score-cards">
+        <div class="score-card">
+          <div class="score-label">R1<br>Prompt Risk</div>
+          <div id="scoreR1" class="score-value">0.000</div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">R2<br>Doc Risk</div>
+          <div id="scoreR2" class="score-value">0.000</div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">Divergence</div>
+          <div id="scoreDiv" class="score-value">0.000</div>
+        </div>
+        <div class="score-card score-card-final">
+          <div class="score-label">Final</div>
+          <div id="scoreFinal" class="score-value">0.000</div>
+        </div>
+      </div>
+
+      <div class="prog-group">
+        <div class="prog-row">
+          <span class="prog-label">Prompt Risk</span>
+          <div class="prog-track"><div id="progR1" class="prog-fill"></div></div>
+        </div>
+        <div class="prog-row">
+          <span class="prog-label">Document Risk</span>
+          <div class="prog-track"><div id="progR2" class="prog-fill"></div></div>
+        </div>
+        <div class="prog-row">
+          <span class="prog-label">Intent Divergence</span>
+          <div class="prog-track"><div id="progDiv" class="prog-fill"></div></div>
+        </div>
+      </div>
+
+      <h3 class="flags-title">THREAT ANALYSIS</h3>
+      <pre id="flagsBox" class="flags-box">No scan run yet.</pre>
+    </aside>
+
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

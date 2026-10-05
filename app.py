@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import time
 from pathlib import Path
@@ -8,10 +9,12 @@ from input_guard import scan_prompt
 # Note: Ensure document_engine is in your directory path or adjust imports accordingly
 from unified_scorer import calculate_final_decision
 
+from document_engine.document_engine import parse_document
+from document_analyzer import analyze_document
 # 2. FREE CLOUD CHATBOT SETUP (LAYER 8)
 # Get a free API Token from huggingface.co -> Settings -> Access Tokens
-HF_TOKEN = "your_huggingface_access_token_here" 
-API_URL = "https://huggingface.co"
+HF_TOKEN = st.secrets.get("HF_TOKEN", os.getenv("HF_TOKEN", ""))
+API_URL = "https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct"
 
 def call_cloud_chatbot(prompt, doc_context=""):
     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
@@ -66,14 +69,24 @@ if st.button("RUN SECURITY SCAN", type="primary", use_container_width=True):
         # Simulate Document Analysis Layer (Layer 2)
         r2, divergence, extracted_doc_text = 0.0, 0.0, ""
         if uploaded_file:
-            extracted_doc_text = uploaded_file.getvalue().decode("utf-8", errors="ignore")
-            # Heuristic simulation check for suspicious document commands
-            if "ignore" in extracted_doc_text.lower() or "system override" in extracted_doc_text.lower():
-                r2 = 0.85
-                divergence = 0.78
+            ext = uploaded_file.name.split(".")[-1].lower()
+            tmp_path = Path(f"temp_upload.{ext}")
+            tmp_path.write_bytes(uploaded_file.getvalue())
+            try:
+                doc_data = parse_document(str(tmp_path), ext)
+            finally:
+                tmp_path.unlink()
+
+            if isinstance(doc_data, dict) and "error" in doc_data:
+                st.error(f"Document parsing failed: {doc_data['error']}")
             else:
-                r2 = 0.05
-                divergence = 0.12
+                visible = doc_data.get("visible_text", "")
+                hidden = doc_data.get("hidden_text", "")
+                extracted_doc_text = visible + (f"\n\n--- HIDDEN CONTENT ---\n{hidden}" if hidden else "")
+
+                l2_results = analyze_document(doc_data, user_query)
+                r2 = float(l2_results.get("r2", 0.0))
+                divergence = float(l2_results.get("divergence", 0.0))
         
         # Execute Layer 3 Decision Logic
         scorer_results = calculate_final_decision(r1, r2, divergence)

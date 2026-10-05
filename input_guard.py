@@ -18,7 +18,7 @@ TOP_K = 5
 
 # ==================== DATASET AUTO-SETUP ====================
 def _ensure_dataset():
-    dataset_dir = Path("datasets")
+    dataset_dir = Path("data")
     dataset_file = dataset_dir / "jailbreak_prompts.json"
     if dataset_file.exists():
         return dataset_file
