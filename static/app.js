@@ -20,6 +20,9 @@ const LAYER_NAMES = {
   output: "Output Guard",
 };
 
+// Conversation memory: [{role: "user" | "assistant", content: "..."}]
+let chatHistory = [];
+
 // ---------- Init ----------
 
 async function loadModels() {
@@ -185,6 +188,7 @@ async function sendMessage(text) {
   const form = new FormData();
   form.append("message", text);
   form.append("model", modelSelect.value);
+  form.append("history", JSON.stringify(chatHistory.slice(-8)));
   if (attached) form.append("file", attached);
 
   // One file per message: clear the picker now that it's captured
@@ -206,8 +210,11 @@ async function sendMessage(text) {
     if (data.blocked) {
       const layer = LAYER_NAMES[data.blocked_by] || "AdaptShield";
       addMessage("blocked", `Blocked by ${layer}. ${data.reason || ""}`.trim());
+      // Blocked messages are NOT added to memory, so attacks don't pollute later turns
     } else {
       addMessage("bot", data.reply);
+      chatHistory.push({ role: "user", content: text });
+      chatHistory.push({ role: "assistant", content: data.reply });
     }
   } catch (err) {
     addMessage("bot", "Request failed: " + err.message);
@@ -239,6 +246,7 @@ attackBtn.addEventListener("click", () => {
 });
 
 clearBtn.addEventListener("click", () => {
+  chatHistory = [];
   chatLog.innerHTML = '<div class="chat-empty">Ask something, or upload a document and ask about it.</div>';
   fileInput.value = "";
   fileName.textContent = "";
@@ -246,4 +254,3 @@ clearBtn.addEventListener("click", () => {
   setScores({ r1: 0, r2: 0, divergence: 0, final_score: 0, decision: "READY", flags: [], keywords: [] });
   flagsBox.textContent = "No scan run yet.";
 });
-

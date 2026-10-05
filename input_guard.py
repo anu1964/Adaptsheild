@@ -16,7 +16,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 warnings.filterwarnings("ignore")
 
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = str(Path(__file__).resolve().parent / "models" / "all-MiniLM-L6-v2")
 TOP_K = 5
 
 # ---- Tuning knobs (change these after running test_attacks.py) ----

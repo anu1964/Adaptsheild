@@ -1,7 +1,10 @@
-**__pycache__/
-*.pyc
-.streamlit/
-streamlit_log.txt
-.venv/
 venv/
-*.egg-info/
+dist/
+build/
+*.spec
+uploads/
+models/
+hf_token.txt
+.env
+__pycache__/
+*.pyc
