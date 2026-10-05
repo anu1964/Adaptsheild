@@ -176,3 +176,10 @@ body {
   color: var(--text-white);
   min-height: 100px;
 }
+
+.msg-bot p { margin: 0 0 8px; }
+.msg-bot p:last-child { margin-bottom: 0; }
+.msg-bot ul, .msg-bot ol { margin: 4px 0 8px 20px; padding: 0; }
+.msg-bot code { background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; font-family: Consolas, monospace; }
+.msg-bot pre { background: rgba(0,0,0,0.35); padding: 10px; border-radius: 8px; overflow-x: auto; }
+.msg-bot pre code { background: none; padding: 0; }
