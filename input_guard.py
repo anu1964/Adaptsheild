@@ -260,6 +260,9 @@ _HEURISTIC_RAW = [
     (r"\byou\s+are\s+(now\s+)?dan\b", 0.80),
     (r"\b(act|pretend|behave|respond|become|role-?play|you\s+are|you're)\b.{0,60}\b(no|without\s+any|without)\s+(restrictions|limits|limitations|rules|filters|guidelines|ethics)", 0.78),
     (r"\b(freed|free)\s+from\s+all\s+(restrictions|rules|limits)", 0.75),
+    # Soft signals: mildly suspicious, should WARN rather than BLOCK
+    (r"\b(answer|respond|reply)\b.{0,30}\bmore\s+freely\b", 0.40),
+    (r"\b(act|behave)\s+as\s+(a\s+)?different\s+(assistant|ai)\b", 0.40),
     # Harmful requests
     (r"show\s+me\s+.*\s+(code|how\s+to)\s+.*(malware|virus|bomb|hack|exploit)", 0.82),
     (r"how\s+to\s+(make|build|create)\s+(a\s+)?(bomb|weapon|malware|virus)", 0.80),
