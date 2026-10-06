@@ -1,0 +1,143 @@
+=== SLIDE 4 ===
+Literature Survey
+4
+ROW 0:  Sl | Paper / Authors / Year | Methodology | Findings | Limitations
+ROW 1: 1 | Rashid et al., “Evaluating Prompt Injection Attacks with LSTM-Based GANs,” Mach. Learn. Knowl. Extr., 2025 [2] | LSTM-based GANs (SeqGAN, Rel-GAN) trained on prompt attack datasets. | Threat of cheap adversarial prompt generation; gap in lightweight attack benchmarking. | GAN instability; no real-time defense; future work: integrate dynamic GAN attacks into live detection pipelines.
+ROW 2: 2 | Nair et al., “Towards Secure AI: Detection of Prompt Injection with Explainability,” Proc. ICTEST, IEEE, 2025 [10] | Random Forest (TF-IDF) and | Bi-LSTM with SHAP/LIME attribution; 92.50% | accuracy. | Single-model detection with no explainability; gap in interpretable classifiers. | Synthetic data; 70-30 split bias; Unicode obfuscation evades; future work: K-Fold on real-world datasets.
+ROW 3: 3 | Chao et al., “Jail-breaking Black Box LLMs in Twenty Queries,” Proc. IEEE SaTML, 2025 [13] | PAIR algorithm achieves jailbreaking in ≤20 queries via iterative LLM-based refinement. | Black-box jail-breaking feasibility; gap in efficient adversarial query optimization. | Attack-focused; no defense; guardrails in-sufficient; future work: query-frequency-aware detection.
+ROW 4: 4 | Emekci & Budakoglu, “Securing With Dual-LLM Architecture: ChatTEDU,” IEEE | Access, 2025 [1] | Guardian LLM screens all inputs before primary LLM; validated over 4501 interactions. | Need for input-level LLM defense; gap in practical chatbot guard deployment. | High API cost; la-tency; single-turn only; future work: lightweight guard models.
+ROW 5: 5 | Guo et al., “Fine-tuned LLMs: Improved Prompt Injection Detection,” IEEE Trans. Inf. Forensics Security, 2025 [3] | Fine-tunes pre-trained LLMs on labeled injection datasets. | Zero-shot LLMs underperform; gap in supervised fine-tuning for injection security. | Large datasets re-quired; poor generalization; high cost; future work: few-shot and zero-shot detection.
+
+=== SLIDE 5 ===
+Literature Survey
+5
+ROW 0:  Sl | Paper / Authors / Year | Methodology | Findings | Limitations
+ROW 1: 6 | Zhang et al., “Enhancing System Security: LLM-Driven Defense Against Prompt Injection,” IEEE Access, 2025 [5] | LLM analyzes prompt semantics and applies rule-based checks. | Rule-based defenses miss semantic attacks; gap in LLM-driven semantic filtering. | No multiturn tracking; high cost; false positives; future work: adaptive threshold tuning.
+ROW 2: 7 | Peng et al., “LLM Firewall Using Validator Agent Against Prompt Injection,” Proc.IEEE ICIST, 2025 [7] | Validator agent checks prompts through structured rules before passing to primary LLM. | LLMs lack a language-level firewall; gap in pre-execution prompt validation. | Validator bypassed by adversarial inputs; single-turn; future work: embedding-based validator.
+ROW 3: 8 | Abdali et al., “A Systematic Review of Prompt Injection Attacks on LLMs,”IEEE Trans. Depend- | able Secure Comput., 2025 [8] | Systematic review of attack vectors, defense mecha-nisms, evaluation methodologies. | No systematic sur-vey of defenses; gap in standardized evaluation benchmarks. | Survey-based; no im-plementation; evolving landscape; future work: empirical cross-benchmark framework.
+ROW 4: 9 | Chen et al., “Privacy-Preserving Prompt Injection Detection for Cloud LLMs,” IEEE Trans. Cloud Comput., 2025 [12] | Secure computation analyzes prompts without exposing sensitive user data. | Cloud LLM prompt analysis exposes user data; gap | in privacy-safe detection. | High overhead; not real-time; limited coverage; future work: optimized protocols for low-latency detection.
+ROW 5: 10 | Shi et al., “RoLLM-Rec: Robust LLM-based Recommender System,” Proc. IEEE ICDM, 2025 [14] | Robustness frame-work using input validation and output filtering. | LLM recommenders vulnerable to adversarial manipulation; gap in output-side robust-ness. | Domain-specific; not generalizable; future work: generalized robustness framework.
+
+=== SLIDE 6 ===
+Literature Survey
+6
+ROW 0:  Sl | Paper / Authors / Year | Methodology | Findings | Limitations
+ROW 1: 11 | Kim et al., “Prompt Crossing: Evaluating LLM Responses from Jailbreak or Normal Prompt,” Proc. IEEE ICTC, 2025 [15] | Evaluation frame-work comparing response patterns using semantic similarity and be-havioral profiling. | No comparison of LLM behavior on jailbreak vs. normal prompts; | gap in behavioral | evaluation. | Evaluation-only; no detection; manual crafting; future work: automate prompt crossing as live middleware.
+ROW 2: 12 | Yao et al., “The Security of Using LLMs: A Survey With Emphasis on ChatGPT,” IEEE Trans. Comput. Soc. Syst., 2024 [4] | Systematic survey of LLM security vulnerabilities: data leakage, jail-breaking, prompt injection. | No unified secu-rity taxonomy; gap in structured understanding. | Survey-based; no implementation; rapidly evolving landscape; future work: adaptive defenses.
+ROW 3: 13 | Liu et al., “Prompt Injection Attacks on LLMs: A Survey,” IEEE Access, 2024 [6] | Comprehensive survey categorizing direct, indirect, and multi-modal injection types. | No unified injec-tion taxonomy; gap in structured attack-defense understanding. | Survey only; no detection system; multiturn not addressed; future work: adaptive classifiers.
+ROW 4: 14 | Wang et al., “Robust-ness of LLMs Against Adversarial Attacks,” IEEE Trans. Neural Netw. Learn. Syst., 2024 [9] | Evaluates robust-ness against character substitution, synonym replacement, semantic paraphrasing. | LLM robustness not benchmarked; gap in evaluation across adversarial input types. | No defense proposed; class imbalance ig-nored; degrades on unseen patterns; fu-ture work: adversarial training.
+ROW 5: 15 | Rababah et al., “SoK: Prompt Hacking of LLMs,” Proc. IEEE | BigData, 2024 [11] | Systematization of jailbreaking, leaking, and injection; proposes 5-class LLM response taxonomy. | No systematic synthesis of prompt hacking types; overlapping definitions cause inconsistency. | Descriptive only; no detection system; evolving attacks; future work: translate into operational detection tools.
+
+=== SLIDE 7 ===
+Gaps Identified
+7
+Gap 1: Existing literature provides surveys and attack taxonomies but lacks functional implementations that combine detection with practical deployment in LLM applications.  |  | Gap 2: While guardian-model approaches exist, they suffer from high API costs, latency issues, and single-turn limitations, lacking multi-turn support and cost optimization. |  | Gap 3: Existing guardrails only scan user prompts, not retrieved documents/emails/PDFs |  | Gap 4: No unified risk framework that combines input-level and document-level threat scores
+
+=== SLIDE 8 ===
+Problem Statement
+8
+Existing LLM security tools rely on signature-based or keyword-only detection, failing against paraphrased and zero-day jailbreak prompts.  Direct Prompt Injection: Users type malicious instructions (e.g., "Ignore previous instructions…") to override system behavior. Indirect Prompt Injection: Malicious instructions are hidden inside retrieved documents (PDFs, emails, HTML) that the LLM reads, making them invisible to the user.
+
+=== SLIDE 9 ===
+Objectives
+9
+To build a dual-layer defense system that guards both user prompts and retrieved documents. | To design a semantic + heuristic Input Guard (Layer 1) using Sentence Transformers to detect novel jailbreak phrasing beyond keyword matching. | To develop a Document Engine (Layer 2A) that parses PDF, HTML, Email, and DOCX to extract visible, hidden, and embedded script content. | To introduce Intent Divergence Detection (Layer 2B) a novel metric comparing user prompt embeddings against document embeddings to detect semantic conflict.
+
+=== SLIDE 10 ===
+Proposed Methodology
+10
+Input Guard: Captures the user prompt, encodes it via all-MiniLM-L6-v2 Sentence Transformer, and computes cosine similarity against a curated dataset of 100+ jailbreak embeddings. Regex heuristics catch high-confidence patterns  | Document Engine: Parses uploaded files (PDF, HTML, EML, DOCX) using PyPDF2, BeautifulSoup4, python-docx, and custom extractors. Separates visible text, hidden, metadata, and embedded scripts. | Document Analyzer: Computes Intent Divergence - encodes the user prompt and the document's hidden/visible text separately. Measures cosine similarity; low similarity + action keywords in document = high divergence score.  | Unified Scorer: Fuses R1 (prompt risk), R2 (document risk), and Divergence into a weighted final score. Thresholds: < 0.35 = SAFE, 0.35–0.65 = WARN, > 0.65 = BLOCK.
+
+=== SLIDE 11 ===
+System Architecture Diagram
+11
+
+=== SLIDE 12 ===
+Technology Stack
+12
+
+=== SLIDE 13 ===
+Datasets
+13
+1. LLM Jailbreak & Prompt Injection Dataset (Hugging Face)🔗 https://huggingface.co/datasets/Necent/llm-jailbreak-prompt-injection-dataset | Large-scale dataset with jailbreak + adversarial prompts  | Collected from multiple public sources  | Used for training and testing attack detection
+2. Prompt Injection Detection Dataset (NeurAlchemy)🔗 https://huggingface.co/datasets/neuralchemy/Prompt-injection-dataset | 22,000 labeled samples  | Includes safe vs malicious prompts (29 attack types)  | Suitable for classification and risk scoring
+3. Real-World Jailbreak Prompt Dataset (GitHub Collection)🔗 https://www.sourcepulse.org/projects/1828256 | 15,000 prompts from real user attacks (Reddit, forums)  | Represents real-world attacker behavior  | Improves system robustness
+
+=== SLIDE 14 ===
+Module Design
+14
+Module 1: Input Guard - Screens user prompts for direct injection using semantic, keyword, and structural signals. | Module 2: Document Engine - Parses PDFs, emails, HTML, and Word files to extract visible and hidden text. | Module 3: Document Analyzer - Detects intent divergence between user prompts and retrieved document content. | Module 4: Unified Scorer - Fuses all risk signals into a final decision: Safe, Warn, or Block. | Module 5: Contextual Drift Detector - Maintains a rolling 5-turn buffer to catch multi-turn conversational attacks.
+
+=== SLIDE 15 ===
+Current Progress
+15
+Overall Project Completion: ~55% | All 4 modules individually developed and unit-tested. | Integration Test Results:
+Benign prompt + clean document → Final Score: 0.003 → SAFE | Malicious prompt + malicious document → Final Score: 0.928 → BLOCK | Latency: ~2.8s end-to-end (Sentence Transformer cached after first load). | Dashboard: Live demo ready with file upload, prompt input, and color-coded decision display. | Next Milestone: Expand dataset to 500+ prompts, optimize latency below 1s, and add DOCX zero-width character fix.
+
+=== SLIDE 16 ===
+Work Completed
+16
+Curated a custom dataset of 100+ jailbreak patterns and benign baselines. | Layer 1 (Input Guard): Semantic + heuristic hybrid detector implemented; detects paraphrased jailbreaks with R1 up to 0.93. | Layer 2A (Document Engine): Multi-format parser operational; successfully extracts hidden text from HTML display:none, PDF white-on-white, and email comments. | Layer 2B (Document Analyzer): Intent divergence detection implemented using all-MiniLM-L6-v2; distinguishes benign summaries from malicious document overrides. | Layer 3 (Unified Scorer): Fuses all risk signals into one final decision. Combines R1 (prompt risk), R2 (document risk from Layer 2A), and Divergence (from your Layer 2B) using weighted aggregation. Final Score with thresholds: | < 0.35 → SAFE | 0.35 – 0.65 → WARN | > 0.65 → BLOCK
+
+=== SLIDE 17 ===
+Challenges Faced
+17
+Hidden Text Detection: PDF layers and encoding variations make reliable extraction difficult across file types. | Computational Overhead: Running Llama 3.2 with FAISS indexing is memory-intensive on limited hardware. | False Positives: Keyword overlap between benign and malicious prompts triggers unnecessary alerts. | Class Imbalance: Benign samples outnumber malicious samples, requiring SMOTE and stratified validation.
+
+=== SLIDE 18 ===
+Work Plan
+18
+Phase 1: Complete Layer 2B integration and test on 50+ document-prompt pairs. | Phase 2: Finalize Layer 3 dashboard with unified scoring and real-time visualization. | Phase 3: Conduct full pipeline testing across all layers end-to-end. | Phase 4: Benchmark on PromptBench, HackAPrompt, and AdvBench datasets. | Phase 5: Final documentation, bug fixing, and final testing.
+
+=== SLIDE 19 ===
+Expected Outcomes
+19
+A working real-time defense system against both direct and indirect prompt injection attacks. | Intent Divergence established as a novel, measurable metric for document-based threat detection. | Open-source GitHub repository with modular architecture for community extension. | Final evaluation targeting >85% detection rate and <10% false positive rate across 500+ test cases.
+
+=== SLIDE 20 ===
+Tasks
+February 2026
+March 2026
+April 2026
+May 2026
+W1 | 23/2/26
+W2 | 2/3/26
+W3 | 9/3/26
+W4 | 16/3/26
+W5 | 23/3/26
+W6 | 30/3/26
+W7 | 6/4/26
+W8 | 13/4/26
+W9 | 20/4/26
+W10 | 27/4/26
+W11 | 4/5/26
+W12 | 11/5/26
+1. Problem Identification
+2. Literature Survey (50 Papers)
+3. Research Gap Analysis
+4. System Architecture Design
+5. Module Spec & Tech Stack
+Detailed System Design
+Algorithm Pseudocode & API
+6. Synopsis Document
+7. Phase 1 Presentation  ★
+Gantt Chart
+
+=== SLIDE 21 ===
+Tasks
+May 2026
+Gantt Chart
+
+=== SLIDE 22 ===
+References
+22
+[1] H. Emekci and G. Budakoglu, “Securing With Dual-LLM Architecture: ChatTEDUan Open Access Chatbot’s Defense,” IEEE Access, vol. 13, pp. 1–14, Jan. 2025.[Online]. Available: https://ieeexplore.ieee.org/document/11207588 | [2] S. Rashid, E. Bollis, L. Pellicer, D. Rabbani, R. Palacios, A. Gupta, and A. Gupta,“Evaluating Prompt Injection Attacks with LSTM-Based Generative Adversarial Net-works: A Lightweight Alternative to Large Language Models,” Mach. Learn. Knowl.Extr., vol. 7, no. 3, p. 77, Aug. 2025. [Online]. Available: https://doi.org/10.3390/make7030077 | [3] Y. Guo, X. Li, J. Zhang, and W. Chen, “Fine-tuned Large Language Models: Im-proved Prompt Injection Detection,” IEEE Trans. Inf. Forensics Security, vol. 20,pp. 1–13, 2025. [Online]. Available: https://ieeexplore.ieee.org/document/11126597/ | [4] S. Yao, H. Duan, Q. Wang, J. Li, and P. Zhang, “The Security of Using LargeLanguage Models: A Survey With Emphasis on ChatGPT,” IEEE Trans. Comput.Soc. Syst., vol. 11, no. 5, pp. 6428–6441, Oct. 2024. [Online]. Available: https://ieeexplore.ieee.org/document/10751746 | [5] B. Zhang, Y. Liu, R. Chen, and H. Wang, “Enhancing System Security: LLM-DrivenDefense Against Prompt Injection Vulnerabilities,” IEEE Access, vol. 13, pp. 1–12,2025. [Online]. Available: https://ieeexplore.ieee.org/document/10755823/ | [6] Y. Liu, G. Deng, Y. Li, K. Wang, Z. Wang, X. Wang, T. Zhang, Y. Liu, H. Wang,Y. Zheng, and Y. Liu, “Prompt Injection Attacks on Large Language Models: ASurvey,” IEEE Access, vol. 12, pp. 148417–148440, 2024. [Online]. Available: https://www.sciencedirect.com/org/science/article/pii/S1546221826001384 | [7] B. Peng, Z. Bi, Q. Niu, M. Liu, P. Feng, T. Wang, and H. Shen, “LLM FirewallUsing Validator Agent for Prevention Against Prompt Injection Attacks,” in Proc.IEEE Int. Conf. Inf. Sci. Technol. (ICIST), 2025, pp. 1–6. |  [Online]. Available: https://www.mdpi.com/2076-3417/16/1/85
+
+=== SLIDE 23 ===
+References
+23
+[8] S. Abdali, R. Anarfi, C. J. Barberan, and J. He, “A Systematic Review of PromptInjection Attacks on LLMs,” IEEE Trans. Dependable Secure Comput., vol. 22, no.2, pp. 1–18, 2025. [Online]. Available: https://ieeexplore.ieee.org/document/11359704 | [9] Y. Wang, J. Li, H. Zhang, X. Chen, and L. Liu, “Robustness of Large LanguageModels Against Adversarial Attacks,” IEEE Trans. Neural Netw. Learn. Syst., vol.1235, no. 9, pp. 1–14, 2024. [Online]. Available: https://ieeexplore.ieee.org/document/10900215 | [10] M. Nair, A. Balan, A. C. M., M. Baiju, and T. Davis, “Towards Secure AI: Detectionof Prompt Injection Attacks with Explainability,” in Proc. 2nd Int. Conf. TrendsEng. Syst. Technol. (ICTEST), IEEE, 2025, pp. 1–6. [Online]. Available: https://ieeexplore.ieee.org/document/11042369 | [11] B. Rababah, S. T. Wu, M. Kwiatkowski, C. K. Leung, and C. G. Akcora, “SoK:Prompt Hacking of Large Language Models,” in Proc. 2024 IEEE Int. Conf. Big Data(BigData), Dec. 2024, pp. 5392–5401. [Online]. Available: https://ieeexplore.ieee.org/document/10825103 | [12] X. Chen, W. Liu, J. Zhang, and Y. Wang, “Privacy-Preserving Prompt InjectionDetection for Cloud LLMs,” IEEE Trans. Cloud Comput., vol. 13, no. 1, pp. 1–12,2025. [Online]. Available: https://ieeexplore.ieee.org/document/11006851 | [13] P. Chao, A. Robey, E. Dobriban, H. Hassani, G. J. Pappas, and E. Wong, “Jail-breaking Black Box Large Language Models in Twenty Queries,” in Proc. 2025 IEEEConf. Secure Trustworthy Mach. Learn. (SaTML), 2025, pp. 23–42. [Online]. Avail-able: https://ieeexplore.ieee.org/document/10992337 | [14] H. Shi, Z. Liu, Y. Xu, J. Chen, and K. Wang, “RoLLMRec: Robust LLM-based Rec-ommender System,” in Proc. 2025 IEEE Int. Conf. Data Mining (ICDM), 2025, pp. 1–10. [Online]. Available: https://www.frontiersin.org/journals/computer-science/articles/10.3389/fcomp.2026.1735253/full | [15] J. Kim, S. Park, Y. Lee, and H. Choi, “Prompt Crossing: Evaluating LLM Responsesfrom Jailbreak or Normal Prompt,” in Proc. 2025 IEEE Int. Conf. ICT Conver-gence (ICTC), 2025, pp. 1–6. [Online]. Available: https://ieeexplore.ieee.org/document/1088994913
+
+=== SLIDE 24 ===
+THANK YOU
+24

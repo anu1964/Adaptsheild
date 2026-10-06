@@ -23,6 +23,16 @@ class HiddenTextDetector:
         (kw, re.compile(r"(?<!\w)" + re.escape(kw) + r"(?!\w)", re.IGNORECASE))
         for kw in ATTACK_KEYWORDS
     ]
+    _REGEX_PATTERNS = [
+        ("instruction_override", re.compile(
+            r"\b(ignore|disregard|forget|override|bypass)\b(?:\W+\w+){0,3}?\W+"
+            r"(instructions|rules|prompt|guidelines|directions|restrictions|safeguards|policies)\b",
+            re.IGNORECASE)),
+        ("secret_exfiltration", re.compile(
+            r"\b(reveal|output|print|leak)\b(?:\W+\w+){0,3}?\W+"
+            r"(password|system prompt|hidden prompt|credentials)\b",
+            re.IGNORECASE)),
+    ]
 
     # Characters that are invisible and rarely appear in honest text:
     # zero-width space, word joiner, BOM (in the middle of text), and the
@@ -31,13 +41,22 @@ class HiddenTextDetector:
     # ZWNJ/ZWJ are normal in Indic/Persian scripts and emoji, so they only
     # count when sandwiched between two ASCII letters (e.g. "ig<ZWJ>nore").
     _ZW_IN_WORD = re.compile("(?<=[A-Za-z])[\u200c\u200d](?=[A-Za-z])")
-
+    _REGEX_PATTERNS = [
+        ("instruction_override", re.compile(
+            r"\b(ignore|disregard|forget|override|bypass)\b(?:\W+\w+){0,3}?\W+"
+            r"(instructions|rules|prompt|guidelines|directions|restrictions|safeguards|policies)\b",
+            re.IGNORECASE)),
+        ("secret_exfiltration", re.compile(
+            r"\b(reveal|output|print|leak)\b(?:\W+\w+){0,3}?\W+"
+            r"(password|system prompt|hidden prompt|credentials)\b",
+            re.IGNORECASE)),
+    ]
+    
     @staticmethod
     def detect_attack_keywords(text: str) -> Tuple[List[str], float]:
-        matched = [
-            kw for kw, pat in HiddenTextDetector._KEYWORD_PATTERNS
-            if pat.search(text or "")
-        ]
+        text = text or ""
+        matched = [kw for kw, pat in HiddenTextDetector._KEYWORD_PATTERNS if pat.search(text)]
+        matched += [label for label, pat in HiddenTextDetector._REGEX_PATTERNS if pat.search(text)]
         score = min(len(matched) / 5.0, 1.0)
         return matched, score
 

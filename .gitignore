@@ -8,3 +8,13 @@ hf_token.txt
 .env
 __pycache__/
 *.pyc
+venv/
+dataset/
+models/
+__pycache__/
+*.pyc
+.env
+dist/
+build/
+*.exe
+Add-Content .gitignore "`n*.pptx`nold_deck_extract.txt"
