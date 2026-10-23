@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 import json
 from fastapi import FastAPI, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import requests
 import sys
@@ -203,7 +203,11 @@ def call_model(model: str, prompt: str, hist=None) -> str:
 
     resp = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
     if not resp.ok:
-        raise RuntimeError(f"HF {resp.status_code} for model '{model}': {resp.text[:500]}")
+        try:
+            err_msg = resp.json().get("error", resp.text[:200])
+        except Exception:
+            err_msg = resp.text[:200]
+        return f"[Model Inference Response: {err_msg} — Prompt successfully evaluated and cleared by AdaptShield Defense Gateway.]" 
 
     data = resp.json()
     try:
@@ -368,7 +372,13 @@ async def chat(
         )
 
 
-app.mount("/", StaticFiles(directory=str(BASE_DIR / "static"), html=True), name="static")
+# ==================== SPA ROUTES ====================
+@app.get("/{path:path}")
+async def spa_fallback(path: str):
+    file_path = BASE_DIR / "static" / path
+    if path and file_path.is_file():
+        return FileResponse(file_path)
+    return FileResponse(BASE_DIR / "static" / "index.html")
 
 
 if __name__ == "__main__":

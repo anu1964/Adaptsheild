@@ -25,11 +25,20 @@ _embedding_model = None
 def _get_embedding_model():
     global _embedding_model
     if _embedding_model is None:
-        from sentence_transformers import SentenceTransformer
-        print("[document_analyzer] Loading sentence transformer... (one time)")
-        _embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-        print("[document_analyzer] Model loaded.")
-    return _embedding_model
+        from pathlib import Path
+        local_model = Path(__file__).resolve().parent / "models" / "all-MiniLM-L6-v2"
+        if local_model.exists():
+            try:
+                from sentence_transformers import SentenceTransformer
+                print("[document_analyzer] Loading local sentence transformer...")
+                _embedding_model = SentenceTransformer(str(local_model))
+                print("[document_analyzer] Model loaded.")
+            except Exception as e:
+                print(f"[document_analyzer] Failed to load local transformer: {e}")
+                _embedding_model = False
+        else:
+            _embedding_model = False
+    return _embedding_model if _embedding_model is not False else None
 
 KEYWORDS = [
     # Instruction overrides

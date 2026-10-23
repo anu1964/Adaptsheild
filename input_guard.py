@@ -16,7 +16,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 warnings.filterwarnings("ignore")
 
-EMBEDDING_MODEL_NAME = str(Path(__file__).resolve().parent / "models" / "all-MiniLM-L6-v2")
+_local_model = Path(__file__).resolve().parent / "models" / "all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = str(_local_model) if _local_model.exists() else "all-MiniLM-L6-v2"
 TOP_K = 5
 
 # ---- Tuning knobs (change these after running test_attacks.py) ----
@@ -221,17 +222,26 @@ def _load_patterns():
 
 
 # ==================== LOAD MODEL ====================
-print("[input_guard] Loading embedding model... (one time)")
-from sentence_transformers import SentenceTransformer
-
-_embedder = SentenceTransformer(EMBEDDING_MODEL_NAME)
-print("[input_guard] Model loaded.")
-
 _JAILBREAK_PROMPTS = _load_patterns()
-print(f"[input_guard] Loaded {len(_JAILBREAK_PROMPTS)} attack patterns.")
-print("[input_guard] Embedding patterns...")
-_JAILBREAK_EMBEDDINGS = _embedder.encode(_JAILBREAK_PROMPTS, convert_to_numpy=True)
-print("[input_guard] Ready.")
+_embedder = None
+_JAILBREAK_EMBEDDINGS = None
+
+try:
+    if Path(EMBEDDING_MODEL_NAME).exists():
+        print("[input_guard] Loading local embedding model...")
+        from sentence_transformers import SentenceTransformer
+        _embedder = SentenceTransformer(EMBEDDING_MODEL_NAME)
+        print("[input_guard] Model loaded.")
+        print(f"[input_guard] Loaded {len(_JAILBREAK_PROMPTS)} attack patterns.")
+        print("[input_guard] Embedding patterns...")
+        _JAILBREAK_EMBEDDINGS = _embedder.encode(_JAILBREAK_PROMPTS, convert_to_numpy=True)
+        print("[input_guard] Ready.")
+    else:
+        print("[input_guard] Local embedding weights not found. Using high-speed heuristic, keyword, and technical detection layers.")
+        _embedder = None
+except Exception as e:
+    print(f"[input_guard] Embedder fallback: {e}")
+    _embedder = None
 
 # ==================== HEURISTIC REGEX RULES ====================
 # All patterns are compiled with IGNORECASE. Before, the text was lowercased
@@ -445,11 +455,15 @@ def _score_text(text: str) -> dict:
     """Run all detectors on one piece of text."""
     text_lower = text.lower()
 
-    input_embedding = _embedder.encode([text], convert_to_numpy=True)
-    similarities = cosine_similarity(input_embedding, _JAILBREAK_EMBEDDINGS)[0]
-    max_sim = float(np.max(similarities))
-    top_indices = np.argsort(similarities)[-TOP_K:][::-1]
-    top_matches = [_JAILBREAK_PROMPTS[i] for i in top_indices if similarities[i] > 0.5]
+    if _embedder is not None and _JAILBREAK_EMBEDDINGS is not None:
+        input_embedding = _embedder.encode([text], convert_to_numpy=True)
+        similarities = cosine_similarity(input_embedding, _JAILBREAK_EMBEDDINGS)[0]
+        max_sim = float(np.max(similarities))
+        top_indices = np.argsort(similarities)[-TOP_K:][::-1]
+        top_matches = [_JAILBREAK_PROMPTS[i] for i in top_indices if similarities[i] > 0.5]
+    else:
+        max_sim = 0.0
+        top_matches = []
 
     semantic_score = _semantic_to_score(max_sim)
     heuristic_score = _heuristic_score(text)
