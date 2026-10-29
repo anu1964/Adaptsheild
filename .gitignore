@@ -5,12 +5,10 @@ build/
 uploads/
 models/
 hf_token.txt
+config.env
 .env
+uploads/
 __pycache__/
 *.pyc
-dataset/
 *.exe
-*.pptx
-old_deck_extract.txt
-.streamlit/secrets.toml
-static/app.broken.js
+website/app.broken.js

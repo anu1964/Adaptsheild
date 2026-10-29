@@ -12,7 +12,8 @@ import warnings
 from pathlib import Path
 
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import sys
+from embedding_engine import get_embedding_engine, cosine_similarity
 
 warnings.filterwarnings("ignore")
 
@@ -26,7 +27,7 @@ WARN_THRESHOLD = 0.3    # r1 between WARN and BLOCK = suspicious
 SEM_LOW = 0.50          # similarity at or below this counts as 0 risk
 SEM_HIGH = 0.80         # similarity at or above this counts as full risk
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 
 # ==================== ATTACK EXAMPLES ====================
 # These are always loaded. data/jailbreak_prompts.json (if it exists) is merged
@@ -227,11 +228,9 @@ _embedder = None
 _JAILBREAK_EMBEDDINGS = None
 
 try:
-    if Path(EMBEDDING_MODEL_NAME).exists():
-        print("[input_guard] Loading local embedding model...")
-        from sentence_transformers import SentenceTransformer
-        _embedder = SentenceTransformer(EMBEDDING_MODEL_NAME)
-        print("[input_guard] Model loaded.")
+    from embedding_engine import get_embedding_engine
+    _embedder = get_embedding_engine()
+    if _embedder is not None:
         print(f"[input_guard] Loaded {len(_JAILBREAK_PROMPTS)} attack patterns.")
         print("[input_guard] Embedding patterns...")
         _JAILBREAK_EMBEDDINGS = _embedder.encode(_JAILBREAK_PROMPTS, convert_to_numpy=True)

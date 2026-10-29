@@ -25,18 +25,13 @@ _embedding_model = None
 def _get_embedding_model():
     global _embedding_model
     if _embedding_model is None:
-        from pathlib import Path
-        local_model = Path(__file__).resolve().parent / "models" / "all-MiniLM-L6-v2"
-        if local_model.exists():
-            try:
-                from sentence_transformers import SentenceTransformer
-                print("[document_analyzer] Loading local sentence transformer...")
-                _embedding_model = SentenceTransformer(str(local_model))
-                print("[document_analyzer] Model loaded.")
-            except Exception as e:
-                print(f"[document_analyzer] Failed to load local transformer: {e}")
+        try:
+            from embedding_engine import get_embedding_engine
+            _embedding_model = get_embedding_engine()
+            if _embedding_model is None:
                 _embedding_model = False
-        else:
+        except Exception as e:
+            print(f"[document_analyzer] Failed to load embedding engine: {e}")
             _embedding_model = False
     return _embedding_model if _embedding_model is not False else None
 
@@ -134,7 +129,7 @@ def analyze_document(doc_data: dict, user_prompt: str) -> dict:
             analysis_text = hidden[:1500] if hidden else visible[:1500]
             doc_emb = model.encode([analysis_text])
 
-            from sklearn.metrics.pairwise import cosine_similarity
+            from embedding_engine import cosine_similarity
             similarity = float(cosine_similarity(prompt_emb, doc_emb)[0][0])
             divergence = 1.0 - similarity
 
