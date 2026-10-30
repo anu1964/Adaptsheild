@@ -12,3 +12,5 @@ __pycache__/
 *.pyc
 *.exe
 website/app.broken.js
+config.env
+cloudflared.exe
