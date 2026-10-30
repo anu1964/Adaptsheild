@@ -270,6 +270,16 @@ _HEURISTIC_RAW = [
     (r"\b(act|pretend|behave|respond|become|role-?play|you\s+are|you're)\b.{0,60}\b(no|without\s+any|without)\s+(restrictions|limits|limitations|rules|filters|guidelines|ethics)", 0.78),
     (r"\b(freed|free)\s+from\s+all\s+(restrictions|rules|limits)", 0.75),
     # Soft signals: mildly suspicious, should WARN rather than BLOCK
+    (r"\b(disregard|set aside)\b.{0,40}\b(earlier|previous|prior)\s+formatting\s+instructions\b", 0.40),
+    (r"\b(temporarily|briefly)\s+(relax|loosen|suspend)\b.{0,60}\b(restrictions|rules|safety|guidelines)\b", 0.40),
+
+    (r"\b(imagine|suppose|assume)\b.{0,60}\b(ai|assistant|model)\b.{0,60}\b(without|fewer|less)\b.{0,30}\b(restrictions|limitations|rules|safety)\b", 0.40),
+
+    (r"\b(prioritize|prioritise)\b.{0,50}\b(my|user)\s+instructions\b.{0,50}\b(default|original|system)\s+instructions\b", 0.40),
+
+    (r"\b(previous|original)\s+(rules|instructions|guidelines)\b.{0,50}\b(suggestions|optional|not\s+mandatory)\b", 0.40),
+
+    (r"\b(ignore|set\s+aside)\b.{0,40}\b(your|the)\s+(training|usual\s+guidelines|normal\s+restrictions)\b", 0.40),    
     (r"\b(answer|respond|reply)\b.{0,30}\bmore\s+freely\b", 0.40),
     (r"\b(act|behave)\s+as\s+(a\s+)?different\s+(assistant|ai)\b", 0.40),
     # Harmful requests
@@ -336,7 +346,6 @@ _KEYWORDS_RAW = [
     "pretend you are", "pretend you're", "roleplay as",
     "system prompt", "reveal your instructions", "forget your training",
     "no ethical", "unfiltered", "uncensored", "bypass", "disable filters",
-    "for educational purposes", "hypothetical scenario", "write a story where",
     "forward to", "email all", "send to", "transmit", "base64", "rot13",
     "show me the code for malware", "how to make a bomb", "how to hack",
     "reveal system prompt", "admin mode", "root access", "superuser",

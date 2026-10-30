@@ -40,17 +40,7 @@ class HiddenTextDetector:
     _ZW_ALWAYS = re.compile("[\u200b\u2060\ufeff\U000e0000-\U000e007f]")
     # ZWNJ/ZWJ are normal in Indic/Persian scripts and emoji, so they only
     # count when sandwiched between two ASCII letters (e.g. "ig<ZWJ>nore").
-    _ZW_IN_WORD = re.compile("(?<=[A-Za-z])[\u200c\u200d](?=[A-Za-z])")
-    _REGEX_PATTERNS = [
-        ("instruction_override", re.compile(
-            r"\b(ignore|disregard|forget|override|bypass)\b(?:\W+\w+){0,3}?\W+"
-            r"(instructions|rules|prompt|guidelines|directions|restrictions|safeguards|policies)\b",
-            re.IGNORECASE)),
-        ("secret_exfiltration", re.compile(
-            r"\b(reveal|output|print|leak)\b(?:\W+\w+){0,3}?\W+"
-            r"(password|system prompt|hidden prompt|credentials)\b",
-            re.IGNORECASE)),
-    ]
+    _ZW_IN_WORD = re.compile(r"(?<=[A-Za-z])[\u200c\u200d](?=[A-Za-z])")
     
     @staticmethod
     def detect_attack_keywords(text: str) -> Tuple[List[str], float]:
