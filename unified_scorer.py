@@ -12,7 +12,8 @@ def calculate_final_decision(
     r1: float,
     r2: float,
     divergence: float,
-    contextual_risk: float = 0.0
+    contextual_risk: float = 0.0,
+    high_confidence_attack: bool = False
 ) -> dict:
 
     r1 = max(0.0, min(float(r1), 1.0))
@@ -61,6 +62,11 @@ def calculate_final_decision(
     else:
         decision = "BLOCK"
 
+# High-confidence document attacks override the normal score bands.
+    if high_confidence_attack:
+        final_score = max(final_score, 0.50)
+        decision = "BLOCK"
+
     contributors = {
         "layer1": r1 * 0.35,
         "layer2": r2 * 0.40,
@@ -82,7 +88,8 @@ def calculate_final_decision(
             "base_fusion": round(base_score, 3),
             "layer1_floor": round(layer1_floor, 3),
             "layer2_floor": round(layer2_floor, 3),
-            "div_floor": round(div_floor, 3)
+            "div_floor": round(div_floor, 3),
+            "high_confidence_attack": high_confidence_attack
         }
     }
 

@@ -1,16 +1,66 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
 venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+config.env
+
+# Runtime files
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+logs/
+*.log
+
+# ML models and caches
+models/
+.cache/
+sentence_transformers/
+
+# Large datasets - retain locally
+data/bipia_dataset.jsonl
+data/jailbreak_prompts.json
+
+# Backup files
+*_backup.py
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Other local files
+
+build/
+*.exe
+cloudflared.exe
+website/app.broken.js
+
 dist/
 build/
-*.spec
-uploads/
-models/
-hf_token.txt
+*.zip
 config.env
-.env
+logs/
+uploads/
+
+dist/
+build/
+*.zip
+config.env
+.venv/
+logs/
 uploads/
 __pycache__/
-*.pyc
-*.exe
-website/app.broken.js
-config.env
 cloudflared.exe

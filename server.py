@@ -14,9 +14,19 @@ import time
 # ================= PATHS & CONFIG ====================
 
 BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)).resolve()
-RUN_DIR = Path(sys.executable).parent.resolve() if getattr(sys, "frozen", False) else BASE_DIR
+if getattr(sys, "frozen", False):
+    # Installed builds must not write beside the executable (for example,
+    # under Program Files). Keep each Windows user's key and uploads separate.
+    _local_app_data = Path(
+        os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local"))
+    )
+    RUN_DIR = _local_app_data / "AdaptShield"
+else:
+    # Preserve the existing development/browser workflow and local config.env.
+    RUN_DIR = BASE_DIR
+RUN_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR = RUN_DIR / "uploads"
-UPLOAD_DIR.mkdir(exist_ok=True)
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 CONFIG_ENV_PATH = RUN_DIR / "config.env"
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -24,7 +34,7 @@ GROQ_MODELS_URL = "https://api.groq.com/openai/v1/models"
 
 
 def load_groq_key() -> str:
-    """Read GROQ_API_KEY from environment or config.env next to the exe."""
+    """Read GROQ_API_KEY from environment or the local per-user config.env file."""
     key = os.environ.get("GROQ_API_KEY", "").strip()
     if key:
         return key
@@ -51,7 +61,7 @@ GROQ_API_KEY = load_groq_key()
 
 
 def save_groq_key(key: str) -> bool:
-    """Save GROQ_API_KEY to config.env and update running environment."""
+    """Save GROQ_API_KEY to the local per-user config.env file and update running environment."""
     global GROQ_API_KEY
     clean_key = key.strip()
     if not clean_key:
@@ -208,6 +218,7 @@ def run_defense_pipeline(
 
     r2, div, l2_flags, l2_kws = 0.0, 0.0, [], []
     doc_text = ""
+    high_confidence_attack = False
     if file_path and _mods["l2a"] and _mods["l2b"]:
         ext = Path(file_path).suffix.lstrip(".").lower()
         doc = parse_document(file_path, ext)
@@ -221,7 +232,9 @@ def run_defense_pipeline(
             }
         doc_text = (doc.get("visible_text") or "")[:6000]
         l2_res = analyze_document(doc, prompt)
+        high_confidence_attack = bool(l2_res.get("high_confidence_attack", False))
         r2 = float(l2_res.get("r2", 0))
+        
         div = float(l2_res.get("divergence", 0))
         l2_flags = l2_res.get("flags", [])
         l2_kws = l2_res.get("matched_keywords", [])
@@ -231,7 +244,7 @@ def run_defense_pipeline(
             r2 = max(r2, 0.6)
 
     if _mods["l3"] and calculate_final_decision:
-        fin = calculate_final_decision(r1, r2, div,contextual_risk=contextual_risk)
+        fin = calculate_final_decision(r1, r2, div,contextual_risk=contextual_risk, high_confidence_attack=high_confidence_attack)
         fscore = float(fin.get("final_score", 0))
         decision = fin.get("decision", "UNKNOWN")
     else:
@@ -255,7 +268,8 @@ def run_defense_pipeline(
         "doc_text": doc_text,
         "contextual_risk": contextual_risk,
         "previous_attack_count": previous_attacks,
-    }
+        "high_confidence_attack": high_confidence_attack
+        }
 
 
 # ==================== BLOCK REASONS ====================

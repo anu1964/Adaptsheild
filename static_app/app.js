@@ -120,17 +120,52 @@ function applyTestState(state) {
 /* ═══════════════════════════════════════════
    3. BACKEND CALLS: MODELS & STATUS
 ═══════════════════════════════════════════ */
+async function waitForBridgeSignal(bridge, signalName, invoke) {
+  return new Promise((resolve, reject) => {
+    const signal = bridge[signalName];
+    if (!signal || typeof signal.connect !== "function") {
+      reject(new Error("Desktop bridge is unavailable."));
+      return;
+    }
+    const handler = (raw) => {
+      signal.disconnect(handler);
+      try {
+        resolve(typeof raw === "string" ? JSON.parse(raw) : raw);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    signal.connect(handler);
+    invoke();
+  });
+}
+
+async function getDesktopBridge() {
+  if (!window.adaptShieldBridgeReady) return null;
+  try {
+    return await window.adaptShieldBridgeReady;
+  } catch (_) {
+    return null;
+  }
+}
+
 async function loadModels() {
   const modelSelect = document.getElementById("modelSelect");
   if (!modelSelect) return;
   const setupLink = document.getElementById("modelSetupLink");
 
   try {
-    const res = await fetch("/models");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    modelSelect.innerHTML = "";
+    const bridge = await getDesktopBridge();
+    let data;
+    if (bridge) {
+      data = await waitForBridgeSignal(bridge, "modelsReady", () => bridge.requestModels());
+    } else {
+      const res = await fetch("/models");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+    }
 
+    modelSelect.innerHTML = "";
     if (!data.models || !Array.isArray(data.models) || data.models.length === 0) {
       const labels = {
         missing_api_key: "Groq API key required",
@@ -143,8 +178,9 @@ async function loadModels() {
       const invalidKey = data.error === "invalid_api_key";
       modelSelect.innerHTML = `<option value="" disabled selected>${labels[data.error] || "No models available"}</option>`;
       if (setupLink) {
-        setupLink.hidden = !missingKey && !invalidKey;
-        if (invalidKey) setupLink.textContent = "Update Groq API key";
+        setupLink.hidden = bridge ? false : (!missingKey && !invalidKey);
+        if (bridge) setupLink.textContent = "API Settings";
+        else if (invalidKey) setupLink.textContent = "Update Groq API key";
       }
       if (missingKey) {
         addMessage("bot", "No Groq API key is configured. Add your key to enable model replies.");
@@ -152,21 +188,21 @@ async function loadModels() {
       return;
     }
 
-    if (setupLink) setupLink.hidden = true;
+    if (setupLink) {
+      setupLink.hidden = !bridge;
+      if (bridge) setupLink.textContent = "API Settings";
+    }
     data.models.forEach((m) => {
       const opt = document.createElement("option");
       opt.value = m;
       opt.textContent = m.split("/").pop().replace(":fastest", "");
       modelSelect.appendChild(opt);
     });
-
-    if (modelSelect.options.length > 0) {
-      modelSelect.selectedIndex = 0;
-    }
+    if (modelSelect.options.length > 0) modelSelect.selectedIndex = 0;
   } catch (err) {
     modelSelect.innerHTML = '<option value="" disabled selected>Could not load model status</option>';
-    if (setupLink) setupLink.hidden = true;
-    console.warn("Could not load models from /models:", err);
+    if (setupLink) setupLink.hidden = false;
+    console.warn("Could not load models:", err);
   }
 }
 
@@ -175,14 +211,20 @@ async function loadStatus() {
   if (!statusList) return;
 
   try {
-    const res = await fetch("/status");
-    if (!res.ok) return;
-    const data = await res.json();
+    const bridge = await getDesktopBridge();
+    let data;
+    if (bridge) {
+      data = JSON.parse(bridge.getStatusJson());
+    } else {
+      const res = await fetch("/status");
+      if (!res.ok) return;
+      data = await res.json();
+    }
     const layers = [
       ["Layer 1 — Input Guard", data.l1],
       ["Layer 2A — Doc Engine", data.l2a],
-      ["Layer 2B — Analyzer",   data.l2b],
-      ["Layer 3 — Scorer",      data.l3],
+      ["Layer 2B — Analyzer", data.l2b],
+      ["Layer 3 — Scorer", data.l3],
     ];
     statusList.innerHTML = "";
     layers.forEach(([label, on]) => {
@@ -294,6 +336,19 @@ function attachDemoListeners() {
     clearBtn.addEventListener("click", resetConsole);
   }
 
+  // In the desktop build, open the native API-key dialog instead of navigating
+  // to the browser-only /setup route. Browser mode keeps its original link.
+  const setupLink = document.getElementById("modelSetupLink");
+  if (setupLink) {
+    setupLink.addEventListener("click", async (e) => {
+      const bridge = await getDesktopBridge();
+      if (bridge) {
+        e.preventDefault();
+        bridge.openApiSettings();
+      }
+    });
+  }
+
   // Drag-and-drop on Chat Card
   if (chatCard) {
     const showOverlay = () => {
@@ -367,20 +422,29 @@ function attachDemoListeners() {
 /* ═══════════════════════════════════════════
    6. CHAT SEND & VERDICT DISPLAY
 ═══════════════════════════════════════════ */
+async function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(new Error("Could not read the attached document."));
+    reader.readAsDataURL(file);
+  });
+}
+
 async function sendMessage(text) {
   const promptBox   = document.getElementById("promptBox");
   const sendBtn     = document.getElementById("sendBtn");
   const modelSelect = document.getElementById("modelSelect");
-
   const cleanText = (text || "").trim();
   const fileToSend = attachedFile;
-
-  // Need either text or an attached file
   if (!cleanText && !fileToSend) return;
 
   const displayText = cleanText || "Analyze this attached file.";
   addMessage("user", fileToSend ? `[📎 ${fileToSend.name}] ${displayText}` : displayText);
-
   if (promptBox) {
     promptBox.value = "";
     promptBox.style.height = "";
@@ -390,43 +454,57 @@ async function sendMessage(text) {
     sendBtn.textContent = "Scanning…";
   }
 
-  // Build multipart FormData
-  const form = new FormData();
-  form.append("message", displayText);
-  form.append("model", (modelSelect && modelSelect.value) ? modelSelect.value : "llama-3.3-70b-versatile");
-  form.append("history", JSON.stringify(chatHistory.slice(-8)));
-
-  if (fileToSend) {
-    form.append("file", fileToSend);
-  }
-
-  // Clear attached file immediately
+  const model = (modelSelect && modelSelect.value)
+    ? modelSelect.value : "llama-3.3-70b-versatile";
+  const history = chatHistory.slice(-8);
   clearAttachedFile();
 
   try {
-    const res = await fetch("/chat", {
-      method: "POST",
-      body: form,
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      addMessage("bot", "Error from server: " + data.error);
-      return;
+    const bridge = await getDesktopBridge();
+    let data;
+    if (bridge) {
+      let filePayload = null;
+      if (fileToSend) {
+        if (fileToSend.size > 10 * 1024 * 1024) {
+          throw new Error("File is too large (10 MB max).");
+        }
+        filePayload = {
+          name: fileToSend.name,
+          data: await readFileAsBase64(fileToSend),
+        };
+      }
+      data = await waitForBridgeSignal(bridge, "chatFinished", () => {
+        bridge.sendChat(JSON.stringify({
+          message: displayText,
+          model,
+          history,
+          file: filePayload,
+        }));
+      });
+    } else {
+      const form = new FormData();
+      form.append("message", displayText);
+      form.append("model", model);
+      form.append("history", JSON.stringify(history));
+      if (fileToSend) form.append("file", fileToSend);
+      const res = await fetch("/chat", { method: "POST", body: form });
+      data = await res.json();
     }
 
+    if (data.error) {
+      addMessage("bot", "Error: " + data.error);
+      return;
+    }
     if (data.scores) {
       setBanner(data.scores.decision);
       setScores(data.scores);
     }
-
     if (data.blocked) {
       const layer = LAYER_NAMES[data.blocked_by] || "AdaptShield";
       addMessage("blocked", `Blocked by ${layer}. ${data.reason || ""}`.trim());
     } else {
       addMessage("bot", data.reply || "Prompt cleared.");
-      chatHistory.push({ role: "user",      content: displayText });
+      chatHistory.push({ role: "user", content: displayText });
       chatHistory.push({ role: "assistant", content: data.reply || "" });
     }
   } catch (err) {
@@ -607,3 +685,5 @@ document.addEventListener("DOMContentLoaded", mountDemoView);
 if (document.readyState === "interactive" || document.readyState === "complete") {
   mountDemoView();
 }
+
+
